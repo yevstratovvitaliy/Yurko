@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var TG_CONTACT = '@yurko_ua_bot'; // TODO: замінити на реальний бот/канал
+  var TG_CONTACT = '@askyurko_bot';
   var MONTHS = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
 
   function $(s, el) { return (el || document).querySelector(s); }
