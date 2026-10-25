@@ -4,6 +4,13 @@ const crypto = require('crypto');
 // Єдиний каталог продуктів. Ціни тут — джерело правди для оплати.
 // files: імена файлів у netlify/functions/templates/
 const PRODUCTS = {
+  // Кредити військовим (п. 15 ст. 14 Закону про соцзахист військовослужбовців)
+  'vijsk-zayava':    { name: 'Заява кредитору про застосування пільги військовослужбовця', price: 299, files: ['vijsk-zayava-kredytoru.docx', 'instrukciya-vijsk.pdf'] },
+  'vijsk-kolektor':  { name: 'Вимога до колектора: документи, розрахунок, пільга', price: 249, files: ['vijsk-vymoga-kolektoru.docx', 'instrukciya-vijsk.pdf'] },
+  'vijsk-nbu':       { name: 'Звернення до НБУ щодо відмови застосувати пільгу', price: 249, files: ['vijsk-zvernennya-nbu.docx', 'instrukciya-vijsk.pdf'] },
+  'vijsk-vidzyv':    { name: 'Відзив на позов кредитора до військового', price: 699, files: ['vijsk-vidzyv.docx', 'instrukciya-vijsk.pdf'] },
+  'pack-vijsk':      { name: 'Пакет «Сам» для військових', price: 599, files: ['vijsk-zayava-kredytoru.docx', 'vijsk-vymoga-kolektoru.docx', 'vijsk-zvernennya-nbu.docx', 'instrukciya-vijsk.pdf'] },
+  // Комуналка
   'nakaz':           { name: 'Заява про скасування судового наказу', price: 299, files: ['zayava-skasuvannya-nakazu.docx', 'instrukciya.pdf'] },
   'ponovlennya':     { name: 'Скасування наказу з поновленням строку', price: 399, files: ['zayava-skasuvannya-ponovlennya.docx', 'instrukciya.pdf'] },
   'davnist':         { name: 'Заява про застосування позовної давності', price: 299, files: ['zayava-davnist.docx', 'instrukciya.pdf'] },

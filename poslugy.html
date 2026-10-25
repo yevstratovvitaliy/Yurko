@@ -17,7 +17,8 @@
   <div class="wrap">
     <a class="logo" href="index.html"><span>Ю</span>Юрко</a>
     <nav class="nav" aria-label="Головне меню">
-      <a href="index.html#perevirka">Перевірити борг</a>
+      <a href="index.html">Військовим</a>
+      <a href="komunalka.html">Комуналка</a>
       <a href="poslugy.html" aria-current="page">Послуги</a>
       <a href="magazyn.html">Шаблони</a>
     </nav>
@@ -25,11 +26,61 @@
 </header>
 
 <main>
-  <section>
+  <section id="vijsk">
     <div class="wrap">
-      <p class="eyebrow">Послуги</p>
+      <p class="eyebrow">Кредити військовим</p>
       <h1>Скільки коштує допомога</h1>
-      <p class="lead" style="margin-top:16px">Почніть з безкоштовної перевірки. Якщо справа проста, вистачить шаблону. Якщо постачальник подав позов, підключається адвокат.</p>
+      <p class="lead" style="margin-top:16px">Почніть з безкоштовного розрахунку. Якщо кредитор один і ще не подав до суду, вистачить шаблону. Якщо кредиторів кілька або вони відмовляють, краще доручити юристу.</p>
+
+      <div class="plans">
+        <div class="plan">
+          <p class="eyebrow">Сам</p>
+          <div class="price mono">599 <small>грн</small></div>
+          <p class="who">Кредитор один-два, до суду ще не дійшло, готові надіслати заяву самі.</p>
+          <ul>
+            <li>Заява кредитору про застосування пільги з вимогою перерахунку</li>
+            <li>Вимога до колектора: документи про відступлення і розрахунок</li>
+            <li>Звернення до НБУ, якщо кредитор відмовив</li>
+            <li>Інструкція: які довідки взяти в частині, як і куди надіслати</li>
+          </ul>
+          <button class="btn" type="button" data-buy="pack-vijsk">Купити і завантажити</button>
+        </div>
+
+        <div class="plan main">
+          <p class="eyebrow">Під ключ</p>
+          <div class="price mono">2 400 <small>грн</small></div>
+          <p class="who">Кредиторів кілька, вони відмовляють або вимагають свої форми.</p>
+          <ul>
+            <li>Юрист перевіряє документи і розрахунки до 5 кредиторів</li>
+            <li>Готує і надсилає заяву кожному кредитору</li>
+            <li>Скарга до НБУ і повторні вимоги, якщо відмовлять</li>
+            <li>Статус по кожному кредитору в Telegram: надіслано, відповідь, перерахунок</li>
+          </ul>
+          <a class="btn" href="index.html#perevirka">Спершу порахувати</a>
+        </div>
+
+        <div class="plan">
+          <p class="eyebrow">Суд</p>
+          <div class="price mono"><small>від</small> 8 000 <small>грн</small></div>
+          <p class="who">Кредитор подав до суду або вже відкрито виконавче провадження.</p>
+          <ul>
+            <li>Відзив з вимогою перерахувати борг і зарахувати сплачене в тіло</li>
+            <li>Клопотання про витребування розрахунку і документів</li>
+            <li>Участь у засіданнях</li>
+            <li>Апеляція оцінюється окремо</li>
+          </ul>
+          <a class="btn ghost" href="index.html#perevirka">Залишити заявку</a>
+        </div>
+      </div>
+      <p class="note" style="margin-top:20px">Знижка 10% на «Під ключ» і «Суд» за кодом від побратима. «Суд» надає адвокат за окремим договором: точну ціну він називає після перегляду документів. Судовий збір оплачується окремо. Тіло кредиту пільга не списує.</p>
+    </div>
+  </section>
+
+  <section class="band" id="komunalka">
+    <div class="wrap">
+      <p class="eyebrow">Комуналка</p>
+      <h2>Борг за комунальні послуги</h2>
+      <p class="lead" style="margin-top:12px">Якщо справа проста, вистачить шаблону. Якщо постачальник подав позов, підключається адвокат.</p>
 
       <div class="plans">
         <div class="plan">
@@ -55,7 +106,7 @@
             <li>Готує заяву під вашу справу, а не шаблон</li>
             <li>30 хвилин консультації в Telegram або телефоном</li>
           </ul>
-          <a class="btn" href="index.html#perevirka">Спершу пройти перевірку</a>
+          <a class="btn" href="komunalka.html#perevirka">Спершу пройти перевірку</a>
         </div>
 
         <div class="plan">
@@ -68,19 +119,10 @@
             <li>Участь у засіданнях</li>
             <li>Апеляція оцінюється окремо</li>
           </ul>
-          <a class="btn ghost" href="index.html#perevirka">Залишити заявку</a>
+          <a class="btn ghost" href="komunalka.html#perevirka">Залишити заявку</a>
         </div>
       </div>
       <p class="note" style="margin-top:20px">«Суд під ключ» надає адвокат за окремим договором. Точну ціну адвокат називає після перегляду документів. Судовий збір і витрати на експертизу, якщо вони потрібні, оплачуються окремо.</p>
-    </div>
-  </section>
-
-  <section class="band">
-    <div class="wrap">
-      <p class="eyebrow">Кредити та МФО</p>
-      <h2>Борг не за комуналку?</h2>
-      <p class="lead" style="margin-top:12px">Ми також перевіряємо нарахування банків і фінкомпаній, готуємо відповіді на вимоги колекторів і відзиви на позови. Опишіть ситуацію у формі після перевірки, і юрист скаже, з чого почати.</p>
-      <p style="margin-top:20px"><a class="btn" href="index.html#perevirka">Описати ситуацію</a></p>
     </div>
   </section>
 </main>
