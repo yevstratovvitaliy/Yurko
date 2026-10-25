@@ -34,13 +34,18 @@ function skuFromOrder(orderRef) {
   return parts.length >= 4 ? parts.slice(1, -2).join('_') : null;
 }
 
+// Повертає true, лише якщо Telegram прийняв повідомлення.
 async function telegram(text) {
   const tok = env('TG_BOT_TOKEN'), chat = env('TG_CHAT_ID');
-  if (!tok || !chat) return;
-  await fetch(`https://api.telegram.org/bot${tok}/sendMessage`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true })
-  }).catch(() => {});
+  if (!tok || !chat) return false;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${tok}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true })
+    });
+    const j = await r.json().catch(() => ({}));
+    return r.ok && j.ok === true;
+  } catch (e) { return false; }
 }
 
 async function checkPaid(orderRef) {

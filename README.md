@@ -39,6 +39,7 @@ netlify/functions/
 | `TG_BOT_TOKEN` | токен бота від @BotFather |
 | `TG_CHAT_ID` | ваш chat id (напишіть боту, потім відкрийте `https://api.telegram.org/bot<TOKEN>/getUpdates`) |
 | `RESEND_API_KEY` | ключ resend.com для листів з посиланнями (необовʼязково) |
+| `LEAD_EMAIL` | куди дублювати заявку, якщо Telegram недоступний (необовʼязково, потрібен RESEND_API_KEY) |
 | `EMAIL_FROM` | напр. `Юрко <hello@ваш-домен>` |
 
 ## Деплой

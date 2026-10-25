@@ -135,6 +135,8 @@ input, select, textarea {
   font: 16px var(--f-body); padding: 12px 14px; border-radius: var(--r); border: 1.5px solid var(--line);
   background: var(--card); color: var(--ink); width: 100%;
 }
+.my { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 8px; }
+.my legend { font-size: 14px; color: var(--muted); padding: 0; margin-bottom: 6px; }
 .qnav { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
 
 /* Result */

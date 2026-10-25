@@ -258,7 +258,7 @@
           f.innerHTML = '<p class="msg ok" role="status">Заявку отримано. Юрист напише вам протягом робочого дня.</p>';
         }).catch(function () {
           btn.disabled = false; btn.textContent = 'Надіслати юристу';
-          f.appendChild(el('p', { class: 'msg warn', role: 'alert' }, 'Заявка не відправилась. Напишіть нам напряму в Telegram: ' + TG_CONTACT + '. У превʼю-версії сайту це очікувано: сервер заявок працює лише після деплою.'));
+          f.appendChild(el('p', { class: 'msg warn', role: 'alert' }, 'Заявка не відправилась. Напишіть нам напряму в Telegram: ' + TG_CONTACT + '.'));
         });
       });
       box.appendChild(f);

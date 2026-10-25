@@ -54,6 +54,23 @@
 
   var today = new Date();
   var thisMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+  var MONTHS_NOM = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+  // Два прості списки замість <input type="month">: на телефонах він незручний
+  function monthYear(id, label, value, minYear) {
+    var p = String(value || '').split('-'), y = +p[0], m = +p[1];
+    var maxY = today.getFullYear();
+    var ms = '<option value="">місяць</option>' + MONTHS_NOM.map(function (n, k) { return '<option value="' + String(k + 1).padStart(2, '0') + '"' + (k + 1 === m ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+    var ys = '<option value="">рік</option>';
+    for (var yy = maxY; yy >= minYear; yy--) ys += '<option value="' + yy + '"' + (yy === y ? ' selected' : '') + '>' + yy + '</option>';
+    return '<fieldset class="my"><legend>' + label + '</legend><div class="row">' +
+      '<label for="' + id + '-m">Місяць<select id="' + id + '-m">' + ms + '</select></label>' +
+      '<label for="' + id + '-y">Рік<select id="' + id + '-y">' + ys + '</select></label></div></fieldset>';
+  }
+  function readMY(id) {
+    var m = $('#' + id + '-m').value, y = $('#' + id + '-y').value;
+    return m && y ? y + '-' + m : '';
+  }
+
   var refFromUrl = (utm().ref || '').toUpperCase();
 
   var A = { status: null, since: '2022-03', dtype: null, loan: '2021-06', body: '', paid: '', demand: '', count: null, stage: null };
@@ -70,9 +87,10 @@
       ['mfo', 'МФО або онлайн-кредит'],
       ['bank', 'Банк: споживчий кредит або кредитка'],
       ['kolektor', 'Колектор чи фінкомпанія, якій продали борг'],
-      ['ipoteka', 'Іпотека або автокредит']] },
+      ['ipoteka', 'Іпотека або автокредит'],
+      ['many', 'Багато різних кредиторів: МФО, банки, колектори']] },
     { id: 'money', q: 'Цифри по одному кредиту', hint: 'Візьміть найбільший. Якщо точно не знаєте, вкажіть приблизно: розрахунок однаково покаже порядок суми.' },
-    { id: 'count', q: 'Скільки всього кредиторів вимагають гроші?', opts: [
+    { id: 'count', only: function () { return A.dtype !== 'many'; }, q: 'Скільки всього кредиторів вимагають гроші?', opts: [
       ['1', 'Один'], ['2-3', 'Два-три'], ['4+', 'Чотири і більше']] },
     { id: 'stage', q: 'Що вже відбувається?', opts: [
       ['none', 'Дзвонять і пишуть, але в суд не йшли'],
@@ -82,16 +100,18 @@
   ];
 
   var i = 0;
+  function active() { return steps.filter(function (x) { return !x.only || x.only(); }); }
 
   function render() {
-    var s = steps[i];
+    var list = active();
+    var s = list[i];
     root.innerHTML = '';
     var prog = el('div', { class: 'progress', 'aria-hidden': 'true' });
-    steps.forEach(function (_, k) { prog.appendChild(el('i', { class: k <= i ? 'on' : '' })); });
+    list.forEach(function (_, k) { prog.appendChild(el('i', { class: k <= i ? 'on' : '' })); });
     root.appendChild(prog);
 
     var box = el('div', { class: 'q' });
-    box.appendChild(el('p', { class: 'eyebrow' }, 'Питання ' + (i + 1) + ' з ' + steps.length));
+    box.appendChild(el('p', { class: 'eyebrow' }, 'Питання ' + (i + 1) + ' з ' + list.length));
     box.appendChild(el('h3', { class: 'qt', id: 'vqt' }, s.q));
     if (s.hint) box.appendChild(el('p', { class: 'hint' }, s.hint));
 
@@ -104,14 +124,13 @@
       });
       box.appendChild(opts);
     } else if (s.id === 'since') {
-      var r = el('div', { class: 'row' });
-      r.innerHTML = '<label for="v-since">Місяць і рік<input id="v-since" type="month" min="2014-03" max="' + thisMonth + '" value="' + A.since + '"></label>';
+      var r = el('div');
+      r.innerHTML = monthYear('v-since', 'Місяць і рік початку служби', A.since, 2014);
       box.appendChild(r);
     } else if (s.id === 'money') {
       var m = el('div', { class: 'form' });
       m.innerHTML =
-        '<div class="row">' +
-          '<label for="v-loan">Коли взяли кредит<input id="v-loan" type="month" min="2005-01" max="' + thisMonth + '" value="' + A.loan + '"></label>' +
+        monthYear('v-loan', 'Коли взяли кредит', A.loan, 2005) + '<div class="row">' +
           '<label for="v-body">Скільки отримали на руки, грн<input id="v-body" inputmode="decimal" placeholder="6000" value="' + A.body + '"></label>' +
         '</div>' +
         '<div class="row">' +
@@ -131,11 +150,12 @@
       var fwd = el('button', { type: 'button', class: 'btn' }, 'Далі');
       fwd.addEventListener('click', function () {
         if (s.id === 'since') {
-          A.since = $('#v-since').value;
+          A.since = readMY('v-since');
+          if (A.since && A.since > thisMonth) { warn(box, 'Дата не може бути в майбутньому.'); return; }
           if (!A.since) { warn(box, 'Вкажіть місяць початку служби. Якщо не памʼятаєте точно, поставте приблизний.'); return; }
         }
         if (s.id === 'money') {
-          A.loan = $('#v-loan').value; A.body = $('#v-body').value; A.paid = $('#v-paid').value || '0'; A.demand = $('#v-demand').value;
+          A.loan = readMY('v-loan'); A.body = $('#v-body').value; A.paid = $('#v-paid').value || '0'; A.demand = $('#v-demand').value;
           if (!A.loan || isNaN(num(A.body)) || num(A.body) <= 0 || isNaN(num(A.demand))) {
             warn(box, 'Заповніть дату кредиту, суму, яку отримали, і суму, яку вимагають. Можна приблизно.'); return;
           }
@@ -154,7 +174,8 @@
   }
 
   function next() {
-    if (i < steps.length - 1) { i++; render(); } else result();
+    if (A.dtype === 'many') A.count = '4+';
+    if (i < active().length - 1) { i++; render(); } else result();
   }
 
   function analyze() {
@@ -227,6 +248,7 @@
     if (A.stage === 'refused') flags.push('Кредитор відмовив. Верховний Суд вказав, що для пільги достатньо звернення і документів про службу, змінювати договір не потрібно (справа № 336/512/18). Відмову варто оскаржити.');
     if (A.stage === 'court') flags.push('Позов уже в суді. Строк на відзив вказаний в ухвалі про відкриття провадження, зазвичай 15 днів. Не пропустіть його.');
     if (A.stage === 'dvs') flags.push('Відкрито виконавче провадження. Тут діяти треба швидко і краще одразу з адвокатом.');
+    if (A.dtype === 'many') flags.push('Кредиторів багато, і всі різні: МФО, банки, колектори. Заяву треба подати кожному окремо, а відповідають вони по-різному. Найкраще працює пакет «під ключ»: юрист веде всіх одночасно, а ви бачите статус по кожному.');
     if (A.dtype === 'kolektor') flags.push('Борг купив колектор. Він отримав права первісного кредитора і не більше: вимагайте договір відступлення і розрахунок.');
     if (A.count === '2-3' || A.count === '4+') flags.push('Кредиторів кілька: заяву треба подати кожному окремо, і кожен відповідає по-своєму. Тут економить час пакет «під ключ».');
     if (flags.length) {
