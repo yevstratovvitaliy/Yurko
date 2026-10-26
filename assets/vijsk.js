@@ -243,6 +243,22 @@
     c2.appendChild(el('p', { class: 'note' }, 'Тіло кредиту пільга не списує: орієнтовно лишається сплатити ' + money(R.principalLeft) + '.'));
     res.appendChild(c2);
 
+    // 2а. Пеня під час воєнного стану — для всіх (п. 18 ПП ЦК)
+    var c18 = el('div', { class: 'card' });
+    c18.innerHTML = '<span class="chip ok">' + (R.eligible === 'no' ? 'Пеню можна зняти навіть без пільги' : 'Ще один аргумент') + '</span>' +
+      '<p>З 24 лютого 2022 року і до кінця воєнного стану пеня, штрафи, інфляційні і 3% річних за прострочення кредиту не стягуються з жодного позичальника, не лише з військових (п. 18 Прикінцевих положень Цивільного кодексу). Саме ця норма найчастіше зменшує суми в судах.</p>';
+    res.appendChild(c18);
+
+    // 2б. Стоп-дзвінки — для військовослужбовців, що служать
+    var serving = A.status === 'mob' || A.status === 'kontrakt_boy' || A.status === 'kontrakt_tyl';
+    if (serving && A.stage !== 'dvs') {
+      var cs = el('div', { class: 'card' });
+      cs.innerHTML = '<span class="chip info">Можна зупинити дзвінки</span>' +
+        '<p>Ви належите до захищеної категорії споживачів. Після повідомлення кредитори і колектори не мають права самі звʼязуватися ні з вами, ні з вашими рідними до кінця воєнного стану і ще 90 днів (п. 6-2 розд. IV Закону «Про споживче кредитування»). Потрібна довідка за формою додатка 2, її видає частина.</p>' +
+        '<div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px"><button class="btn ghost" type="button" data-buy="vijsk-stop">Шаблон «Стоп-колектори» · 199 грн</button></div>';
+      res.appendChild(cs);
+    }
+
     // 3. Стадія
     var flags = [];
     if (A.stage === 'refused') flags.push('Кредитор відмовив. Верховний Суд вказав, що для пільги достатньо звернення і документів про службу, змінювати договір не потрібно (справа № 336/512/18). Відмову варто оскаржити.');
@@ -273,7 +289,9 @@
         ? '<p>Справа вже в суді чи у виконавця. Шаблоном тут ризиковано: залиште заявку, і юрист скаже, що подати і до якої дати.</p>'
         : '<p>Подати заяву кредитору можна самостійно за шаблоном з інструкцією, або доручити юристу заяви всім кредиторам одразу, зі статусами в Telegram.</p>') +
       '<div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">' +
-        (hard ? '' : '<button class="btn" type="button" data-buy="pack-vijsk">Шаблони «Сам» · 599 грн</button>') +
+        (hard ? '' : (A.status === 'spouse'
+          ? '<button class="btn" type="button" data-buy="vijsk-druzhyna">Заява для дружини (чоловіка) · 299 грн</button>'
+          : '<button class="btn" type="button" data-buy="pack-vijsk">Шаблони «Сам» · 599 грн</button>')) +
         '<a class="btn ghost" href="poslugy.html#vijsk">Усі пакети</a>' +
       '</div>';
     res.appendChild(c5);

@@ -9,7 +9,9 @@ const PRODUCTS = {
   'vijsk-kolektor':  { name: 'Вимога до колектора: документи, розрахунок, пільга', price: 249, files: ['vijsk-vymoga-kolektoru.docx', 'instrukciya-vijsk.pdf'] },
   'vijsk-nbu':       { name: 'Звернення до НБУ щодо відмови застосувати пільгу', price: 249, files: ['vijsk-zvernennya-nbu.docx', 'instrukciya-vijsk.pdf'] },
   'vijsk-vidzyv':    { name: 'Відзив на позов кредитора до військового', price: 699, files: ['vijsk-vidzyv.docx', 'instrukciya-vijsk.pdf'] },
-  'pack-vijsk':      { name: 'Пакет «Сам» для військових', price: 599, files: ['vijsk-zayava-kredytoru.docx', 'vijsk-vymoga-kolektoru.docx', 'vijsk-zvernennya-nbu.docx', 'instrukciya-vijsk.pdf'] },
+  'vijsk-stop':      { name: 'Стоп-колектори: повідомлення про захищену категорію', price: 199, files: ['vijsk-stop-kolektory.docx', 'instrukciya-vijsk.pdf'] },
+  'vijsk-druzhyna':  { name: 'Заява дружини (чоловіка) військовослужбовця про пільгу', price: 299, files: ['vijsk-zayava-druzhyny.docx', 'instrukciya-vijsk.pdf'] },
+  'pack-vijsk':      { name: 'Пакет «Сам» для військових', price: 599, files: ['vijsk-zayava-kredytoru.docx', 'vijsk-zayava-druzhyny.docx', 'vijsk-stop-kolektory.docx', 'vijsk-vymoga-kolektoru.docx', 'vijsk-zvernennya-nbu.docx', 'instrukciya-vijsk.pdf'] },
   // Комуналка
   'nakaz':           { name: 'Заява про скасування судового наказу', price: 299, files: ['zayava-skasuvannya-nakazu.docx', 'instrukciya.pdf'] },
   'ponovlennya':     { name: 'Скасування наказу з поновленням строку', price: 399, files: ['zayava-skasuvannya-ponovlennya.docx', 'instrukciya.pdf'] },
