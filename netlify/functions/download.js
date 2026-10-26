@@ -1,14 +1,14 @@
 // Віддає оплачений файл за підписаним посиланням.
 const fs = require('fs');
 const path = require('path');
-const { PRODUCTS, token, skuFromOrder } = require('./_lib');
+const { resolveProduct, token, skuFromOrder } = require('./_lib');
 
 const TYPES = { '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.pdf': 'application/pdf' };
 
 exports.handler = async (event) => {
   const q = event.queryStringParameters || {};
   const { o, f, t } = q;
-  const p = PRODUCTS[skuFromOrder(o)];
+  const p = resolveProduct(skuFromOrder(o));
   if (!o || !f || !t || !p || !p.files.includes(f) || token(o, f) !== t) {
     return { statusCode: 403, body: 'Посилання недійсне' };
   }

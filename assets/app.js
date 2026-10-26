@@ -289,7 +289,7 @@
         })
         .catch(function () {
           b.disabled = false;
-          var m = el('p', { class: 'msg warn', role: 'alert' }, 'Оплата зараз недоступна. У превʼю-версії це очікувано: оплата через WayForPay запрацює після деплою.');
+          var m = el('p', { class: 'msg warn', role: 'alert' }, 'Оплата тимчасово недоступна. Напишіть нам у Telegram: @askyurko_bot, і ми надішлемо документи вручну.');
           m.style.gridColumn = '1 / -1';
           host.appendChild(m);
         });

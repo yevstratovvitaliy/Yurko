@@ -17,6 +17,7 @@ function vijskLines(name, contact, d, q, s, u) {
     `Статус: ${VSTATUS[q.status] || '—'} · служба з ${q.since || '?'}`,
     `Кредитор: ${VTYPE[q.dtype] || '—'} · кредиторів: ${q.count || '?'} · стадія: ${VSTAGE[q.stage] || '—'}`,
     `Кредит ${q.loan || '?'}: отримав ${uah(q.body)}, сплатив ${uah(q.paid)}, вимагають ${uah(q.demand)}`,
+    Array.isArray(s.plan) && s.plan.length ? `📋 Рекомендовано: ${s.plan.join(', ')}` : null,
     `Зайве: ${s.upTo ? 'до ' : '≈ '}${uah(s.excess)} · тіло лишилось ${uah(s.principalLeft)}${s.overpaid ? ' · переплата ' + uah(s.overpaid) : ''}`,
     d.note ? `💬 ${String(d.note).slice(0, 500)}` : null,
     Object.keys(u).length ? `📈 ${Object.entries(u).map(([k, v]) => k + '=' + v).join(' ')}` : null

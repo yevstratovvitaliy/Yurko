@@ -24,6 +24,45 @@ const PRODUCTS = {
 
 const env = (k, def) => process.env[k] || def;
 
+// ---------- Персональний набір після квізу ----------
+// Короткі імена для набору; набір кодується в orderReference як b-zayava.stop.kolektor
+const BUNDLE_ITEMS = { zayava: 'vijsk-zayava', druzhyna: 'vijsk-druzhyna', stop: 'vijsk-stop', kolektor: 'vijsk-kolektor', nbu: 'vijsk-nbu', vidzyv: 'vijsk-vidzyv' };
+const BUNDLE_DISCOUNT = 0.2;      // знижка на набір з 2+ шаблонів
+const OFFER_MINUTES = 30;         // скільки діє ціна набору — перевіряється на сервері
+
+function bundlePrice(items) {
+  const sum = items.reduce((a, k) => a + PRODUCTS[BUNDLE_ITEMS[k]].price, 0);
+  if (items.length < 2) return { sum, price: sum };
+  return { sum, price: Math.round(sum * (1 - BUNDLE_DISCOUNT) / 10) * 10 - 1 };
+}
+function parseBundle(sku) {
+  if (!/^b-[a-z.]+$/.test(String(sku))) return null;
+  const items = [...new Set(sku.slice(2).split('.'))];
+  if (!items.length || items.length > 6 || !items.every(k => BUNDLE_ITEMS[k])) return null;
+  return items.sort();
+}
+// Повертає продукт для звичайного SKU або для набору b-...
+function resolveProduct(sku) {
+  if (PRODUCTS[sku]) return PRODUCTS[sku];
+  const items = parseBundle(sku);
+  if (!items) return null;
+  const files = [...new Set(items.flatMap(k => PRODUCTS[BUNDLE_ITEMS[k]].files))];
+  return { name: 'Ваш набір: ' + items.map(k => PRODUCTS[BUNDLE_ITEMS[k]].name).join('; '), price: bundlePrice(items).price, files, items };
+}
+function offerSig(sku, exp) {
+  return crypto.createHmac('sha256', env('DOWNLOAD_SECRET', '')).update('offer|' + sku + '|' + exp).digest('hex').slice(0, 32);
+}
+// Тіло запиту від WayForPay може прийти як JSON, як форма або в base64 (Netlify)
+function parseBody(event) {
+  let raw = event.body || '';
+  if (event.isBase64Encoded) raw = Buffer.from(raw, 'base64').toString('utf8');
+  try { const j = JSON.parse(raw); if (j && typeof j === 'object') return j; } catch (e) {}
+  const out = Object.fromEntries(new URLSearchParams(raw));
+  const keys = Object.keys(out);
+  if (keys.length === 1 && out[keys[0]] === '') { try { return JSON.parse(keys[0]); } catch (e) {} }
+  return out;
+}
+
 function hmacMd5(str) {
   return crypto.createHmac('md5', env('WFP_SECRET_KEY', '')).update(str, 'utf8').digest('hex');
 }
@@ -65,7 +104,7 @@ async function checkPaid(orderRef) {
 
 function downloadLinks(orderRef) {
   const sku = skuFromOrder(orderRef);
-  const p = PRODUCTS[sku];
+  const p = resolveProduct(sku);
   if (!p) return [];
   const base = env('SITE_URL', '');
   return p.files.map(f => ({
@@ -86,4 +125,4 @@ async function sendEmail(to, subject, html) {
 
 const json = (status, obj) => ({ statusCode: status, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) });
 
-module.exports = { PRODUCTS, env, hmacMd5, token, skuFromOrder, telegram, checkPaid, downloadLinks, sendEmail, json };
+module.exports = { PRODUCTS, BUNDLE_ITEMS, OFFER_MINUTES, bundlePrice, parseBundle, resolveProduct, offerSig, parseBody, env, hmacMd5, token, skuFromOrder, telegram, checkPaid, downloadLinks, sendEmail, json };

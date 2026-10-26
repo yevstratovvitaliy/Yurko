@@ -242,22 +242,13 @@
     if (R.overpaid > 0) c2.appendChild(el('p', { class: 'note' }, 'Ви вже сплатили на ' + money(R.overpaid) + ' більше, ніж отримали. Ці гроші можна вимагати зарахувати або повернути (КЦС ВС, справа № 336/512/18).'));
     c2.appendChild(el('p', { class: 'note' }, 'Тіло кредиту пільга не списує: орієнтовно лишається сплатити ' + money(R.principalLeft) + '.'));
     res.appendChild(c2);
+    var planSlot = el('div'); res.appendChild(planSlot);
 
     // 2а. Пеня під час воєнного стану — для всіх (п. 18 ПП ЦК)
     var c18 = el('div', { class: 'card' });
     c18.innerHTML = '<span class="chip ok">' + (R.eligible === 'no' ? 'Пеню можна зняти навіть без пільги' : 'Ще один аргумент') + '</span>' +
       '<p>З 24 лютого 2022 року і до кінця воєнного стану пеня, штрафи, інфляційні і 3% річних за прострочення кредиту не стягуються з жодного позичальника, не лише з військових (п. 18 Прикінцевих положень Цивільного кодексу). Саме ця норма найчастіше зменшує суми в судах.</p>';
     res.appendChild(c18);
-
-    // 2б. Стоп-дзвінки — для військовослужбовців, що служать
-    var serving = A.status === 'mob' || A.status === 'kontrakt_boy' || A.status === 'kontrakt_tyl';
-    if (serving && A.stage !== 'dvs') {
-      var cs = el('div', { class: 'card' });
-      cs.innerHTML = '<span class="chip info">Можна зупинити дзвінки</span>' +
-        '<p>Ви належите до захищеної категорії споживачів. Після повідомлення кредитори і колектори не мають права самі звʼязуватися ні з вами, ні з вашими рідними до кінця воєнного стану і ще 90 днів (п. 6-2 розд. IV Закону «Про споживче кредитування»). Потрібна довідка за формою додатка 2, її видає частина.</p>' +
-        '<div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px"><button class="btn ghost" type="button" data-buy="vijsk-stop">Шаблон «Стоп-колектори» · 199 грн</button></div>';
-      res.appendChild(cs);
-    }
 
     // 3. Стадія
     var flags = [];
@@ -281,20 +272,8 @@
     c4.appendChild(ul);
     res.appendChild(c4);
 
-    // 5. Що далі
-    var c5 = el('div', { class: 'card' });
-    var hard = A.stage === 'court' || A.stage === 'dvs';
-    c5.innerHTML = '<h3>Що далі</h3>' +
-      (hard
-        ? '<p>Справа вже в суді чи у виконавця. Шаблоном тут ризиковано: залиште заявку, і юрист скаже, що подати і до якої дати.</p>'
-        : '<p>Подати заяву кредитору можна самостійно за шаблоном з інструкцією, або доручити юристу заяви всім кредиторам одразу, зі статусами в Telegram.</p>') +
-      '<div class="actions" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">' +
-        (hard ? '' : (A.status === 'spouse'
-          ? '<button class="btn" type="button" data-buy="vijsk-druzhyna">Заява для дружини (чоловіка) · 299 грн</button>'
-          : '<button class="btn" type="button" data-buy="pack-vijsk">Шаблони «Сам» · 599 грн</button>')) +
-        '<a class="btn ghost" href="poslugy.html#vijsk">Усі пакети</a>' +
-      '</div>';
-    res.appendChild(c5);
+    // 5. Персональний план і набір — показуємо одразу під сумою
+    planSlot.replaceWith(planCard());
 
     res.appendChild(el('p', { class: 'note' }, 'Розрахунок орієнтовний: ми не бачимо ставок, графіка і того, як кредитор зараховував платежі. Точну суму юрист рахує за розрахунком кредитора.'));
     res.appendChild(leadForm(R));
@@ -304,33 +283,125 @@
     res.appendChild(again);
 
     root.appendChild(res);
-    bindBuy(res);
     root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ---------- Персональний план ----------
+  var T = {
+    stop:     { name: 'Стоп-колектори', price: 199, why: 'Зупиняє дзвінки вам і рідним. Надсилайте першим, разом із довідкою з частини.' },
+    zayava:   { name: 'Заява кредитору про пільгу', price: 299, why: 'Головний документ: не нараховувати відсотки, пеню і штрафи з дня призову, перерахувати борг, сплачене — в тіло кредиту.' },
+    druzhyna: { name: 'Заява дружини (чоловіка) військового', price: 299, why: 'Головний документ для кредиту, оформленого на вас: ті самі вимоги, документи про службу чоловіка (дружини).' },
+    kolektor: { name: 'Вимога до колектора', price: 249, why: 'Борг купили: хай спершу доведуть право вимоги і покажуть розрахунок. Без цього платити не обовʼязково.' },
+    nbu:      { name: 'Звернення до НБУ', price: 249, why: 'Кредитор уже відмовив — наступний крок: скарга до Нацбанку з копією вашої заяви.' },
+    vidzyv:   { name: 'Відзив на позов', price: 699, why: 'Позов уже в суді: відзив з власним розрахунком. Строк — в ухвалі суду, зазвичай 15 днів.' }
+  };
+  var PACK = ['druzhyna', 'kolektor', 'nbu', 'stop', 'zayava'];
+
+  function recommend() {
+    if (A.stage === 'dvs') return [];
+    var out = [];
+    var serving = A.status === 'mob' || A.status === 'kontrakt_boy' || A.status === 'kontrakt_tyl';
+    if (serving) out.push('stop');
+    out.push(A.status === 'spouse' ? 'druzhyna' : 'zayava');
+    if (A.dtype === 'kolektor' || A.dtype === 'many') out.push('kolektor');
+    if (A.stage === 'refused') out.push('nbu');
+    if (A.stage === 'court') out.push('vidzyv');
+    return out;
+  }
+  function bundlePrice(items) {
+    var sum = items.reduce(function (a, k) { return a + T[k].price; }, 0);
+    return { sum: sum, price: items.length < 2 ? sum : Math.round(sum * 0.8 / 10) * 10 - 1 };
+  }
+
+  function planCard() {
+    var items = recommend();
+    var c = el('div', { class: 'card plan-card' });
+    if (!items.length) {
+      c.innerHTML = '<h3>Ваш план</h3><p>Відкрито виконавче провадження, тут шаблоном не обійтись: потрібен адвокат, який подасть заяви виконавцю і в суд. Залиште заявку нижче, і юрист скаже, що робити першим. Пакет «Суд» — від 8\u00a0000 грн.</p>';
+      return c;
+    }
+    c.innerHTML = '<span class="chip info">Для вашої ситуації</span><h3>Ваш план: що надіслати і кому</h3>';
+    var ol = el('ol', { class: 'steps-list' });
+    items.forEach(function (k) {
+      ol.appendChild(el('li', null, '<b>' + T[k].name + '</b> <span class="mono note">' + T[k].price + ' грн</span><br><span class="note">' + T[k].why + '</span>'));
+    });
+    c.appendChild(ol);
+
+    var box = el('div', { class: 'offer' });
+    c.appendChild(box);
+    var bp = bundlePrice(items);
+    var inPack = items.every(function (k) { return PACK.indexOf(k) >= 0; });
+
+    if (items.length === 1) {
+      box.innerHTML = '<button class="btn" type="button" data-buy="vijsk-' + (items[0] === 'zayava' ? 'zayava' : items[0]) + '">Купити за ' + bp.sum + ' грн</button>';
+      bindBuy(box);
+    } else if (inPack && bp.price >= 599) {
+      // повний пакет дешевший або так само: чесно пропонуємо його
+      box.innerHTML = '<p>Окремо: <s class="mono">' + bp.sum + ' грн</s></p>' +
+        '<p><b>Пакет «Сам» — 599 грн</b>: усе з вашого плану і ще ' + (PACK.length - items.length) + ' ' + (PACK.length - items.length === 1 ? 'шаблон' : 'шаблони') + ' на випадок, якщо кредитор відмовить чи продасть борг.</p>' +
+        '<button class="btn" type="button" data-buy="pack-vijsk">Купити пакет за 599 грн</button>';
+      bindBuy(box);
+    } else {
+      box.innerHTML = '<p>Окремо: <s class="mono">' + bp.sum + ' грн</s> · <b>Набором: <span class="mono">' + bp.price + ' грн</span></b> (−20%)</p><p class="note timer" aria-live="polite">Фіксую ціну набору…</p>';
+      postJSON('/.netlify/functions/offer', { items: items })
+        .then(function (o) {
+          var btn = el('button', { type: 'button', class: 'btn' }, 'Купити набір за ' + o.price + ' грн');
+          box.appendChild(btn);
+          btn.addEventListener('click', function () { checkout(btn, o.sku, { exp: o.exp, sig: o.sig }); });
+          var t = $('.timer', box);
+          (function tick() {
+            var left = Math.max(0, o.exp - Date.now());
+            if (!left) {
+              t.textContent = 'Ціна набору завершилась. Шаблони можна купити окремо в магазині або пройти розрахунок ще раз.';
+              btn.remove();
+              box.appendChild(el('a', { class: 'btn ghost', href: 'magazyn.html#vijsk' }, 'До шаблонів'));
+              return;
+            }
+            var m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
+            t.innerHTML = 'Ціна набору діє ще <b class="mono">' + m + ':' + String(sec).padStart(2, '0') + '</b>';
+            setTimeout(tick, 1000);
+          })();
+        })
+        .catch(function () {
+          $('.timer', box).textContent = 'Набір зараз недоступний — шаблони можна купити окремо.';
+          box.appendChild(el('a', { class: 'btn ghost', href: 'magazyn.html#vijsk' }, 'До шаблонів'));
+        });
+    }
+    c.appendChild(el('p', { class: 'note' }, A.stage === 'court'
+      ? 'Не хочете розбиратися самі? Адвокат веде справу в суді без вашої участі — від 4\u00a0000 грн за позов до 50\u00a0000 грн. <a href="poslugy.html#vijsk">Детальніше</a>'
+      : 'Не хочете розбиратися самі? Юрист зробить усе це за вас «під ключ» — 2\u00a0400 грн, до 5 кредиторів. <a href="poslugy.html#vijsk">Детальніше</a>'));
+    return c;
+  }
+
+  function checkout(b, sku, extra) {
+    b.disabled = true;
+    track('InitiateCheckout', { content_ids: [sku] });
+    var body = { sku: sku, utm: utm() };
+    for (var k in extra || {}) body[k] = extra[k];
+    fetch('/.netlify/functions/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) { var e = new Error(j.error || r.status); e.status = r.status; throw e; } return j; }); })
+      .then(function (r) {
+        var form = el('form', { method: 'POST', action: r.url, 'accept-charset': 'utf-8' });
+        Object.keys(r.fields).forEach(function (k) {
+          [].concat(r.fields[k]).forEach(function (v) {
+            var inp = el('input', { type: 'hidden', name: Array.isArray(r.fields[k]) ? k + '[]' : k });
+            inp.value = v; form.appendChild(inp);
+          });
+        });
+        document.body.appendChild(form); form.submit();
+      })
+      .catch(function (e) {
+        b.disabled = false;
+        var msg = e.status === 410 ? 'Час дії ціни набору минув. Пройдіть розрахунок ще раз або купіть шаблони окремо.'
+          : 'Оплата тимчасово недоступна. Напишіть нам у Telegram: ' + TG_CONTACT + ', і ми надішлемо документи вручну.';
+        b.parentNode.appendChild(el('p', { class: 'msg warn', role: 'alert' }, msg));
+      });
   }
 
   // Кнопки оплати, додані після завантаження сторінки (app.js вішає обробники лише на ті, що є одразу)
   function bindBuy(scope) {
     scope.querySelectorAll('[data-buy]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var sku = b.getAttribute('data-buy');
-        b.disabled = true;
-        track('InitiateCheckout', { content_ids: [sku] });
-        postJSON('/.netlify/functions/pay', { sku: sku, utm: utm() })
-          .then(function (r) {
-            var form = el('form', { method: 'POST', action: r.url, 'accept-charset': 'utf-8' });
-            Object.keys(r.fields).forEach(function (k) {
-              [].concat(r.fields[k]).forEach(function (v) {
-                var inp = el('input', { type: 'hidden', name: Array.isArray(r.fields[k]) ? k + '[]' : k });
-                inp.value = v; form.appendChild(inp);
-              });
-            });
-            document.body.appendChild(form); form.submit();
-          })
-          .catch(function () {
-            b.disabled = false;
-            b.parentNode.appendChild(el('p', { class: 'msg warn', role: 'alert' }, 'Оплата зараз недоступна. Напишіть нам у Telegram: ' + TG_CONTACT + '.'));
-          });
-      });
+      b.addEventListener('click', function () { checkout(b, b.getAttribute('data-buy')); });
     });
   }
 
@@ -356,7 +427,7 @@
         kind: 'vijsk', name: name, contact: contact,
         ref: $('#vl-ref', f).value.trim().slice(0, 30),
         note: $('#vl-note', f).value.trim(),
-        quiz: A, summary: { excess: Math.round(R.excess), upTo: !R.inService, principalLeft: Math.round(R.principalLeft), overpaid: Math.round(R.overpaid), eligible: R.eligible },
+        quiz: A, summary: { plan: recommend(), excess: Math.round(R.excess), upTo: !R.inService, principalLeft: Math.round(R.principalLeft), overpaid: Math.round(R.overpaid), eligible: R.eligible },
         utm: utm(), page: location.pathname
       }).then(function () {
         track('Lead', { quiz: 'vijsk' });

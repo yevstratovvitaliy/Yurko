@@ -211,3 +211,10 @@ footer .wrap { display: grid; gap: 10px; }
   .nav a.pill { padding: 3px 9px; }
   .panel { padding: 20px; }
 }
+
+/* Персональний план після квізу */
+.plan-card { border: 2px solid var(--stamp); }
+.steps-list { margin: 4px 0 0; padding-left: 22px; display: grid; gap: 10px; }
+.offer { display: grid; gap: 8px; background: var(--stamp-soft); border-radius: var(--r); padding: 14px 16px; margin-top: 6px; }
+.offer .btn { justify-self: start; }
+.offer s { color: var(--muted); }

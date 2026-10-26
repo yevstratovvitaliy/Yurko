@@ -1,11 +1,9 @@
 // serviceUrl: WayForPay повідомляє сервер про результат оплати.
 // Перевіряємо підпис, надсилаємо покупцю посилання на email, а вам — сповіщення в Telegram.
-const { PRODUCTS, hmacMd5, skuFromOrder, telegram, downloadLinks, sendEmail } = require('./_lib');
+const { resolveProduct, parseBody, hmacMd5, skuFromOrder, telegram, downloadLinks, sendEmail } = require('./_lib');
 
 exports.handler = async (event) => {
-  let d = {};
-  try { d = JSON.parse(event.body || '{}'); }
-  catch (e) { try { d = JSON.parse(Object.keys(Object.fromEntries(new URLSearchParams(event.body)))[0]); } catch (e2) {} }
+  const d = parseBody(event);
 
   const expected = hmacMd5([
     d.merchantAccount, d.orderReference, d.amount, d.currency,
@@ -18,7 +16,7 @@ exports.handler = async (event) => {
 
   if (d.transactionStatus === 'Approved') {
     const sku = skuFromOrder(d.orderReference);
-    const p = PRODUCTS[sku] || { name: sku };
+    const p = resolveProduct(sku) || { name: sku };
     const links = downloadLinks(d.orderReference);
     await sendEmail(d.email, `Ваші документи: ${p.name}`,
       `<p>Дякуємо за покупку.</p><p>Посилання на завантаження:</p><ul>${links.map(l => `<li><a href="${l.url}">${l.file}</a></li>`).join('')}</ul>` +
